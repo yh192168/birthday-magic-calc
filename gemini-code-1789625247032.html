@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>誕生日計算ミニツール</title>
+    <style>
+        body {
+            font-family: "ＭＳ Ｐゴシック", "MS PGothic", sans-serif;
+            background-color: #c0c0c0;
+            color: #000;
+            padding: 20px;
+        }
+        .window {
+            background-color: #ece9d8;
+            border: 2px solid;
+            border-color: #fff #808080 #808080 #fff;
+            padding: 2px;
+            margin-bottom: 20px;
+            max-width: 800px;
+        }
+        .title-bar {
+            background: linear-gradient(to right, #000080, #1084d0);
+            color: white;
+            padding: 3px 5px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .content {
+            padding: 10px;
+            border: 1px solid #808080;
+            background-color: #fff;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 12px;
+        }
+        th, td {
+            border: 1px solid #808080;
+            padding: 4px;
+            text-align: center;
+        }
+        th {
+            background-color: #d4d0c8;
+        }
+        .scroll-box {
+            height: 200px;
+            overflow-y: scroll;
+            border: 1px inset #808080;
+        }
+        input[type="text"], input[type="number"] {
+            border: 1px inset #808080;
+            padding: 2px;
+        }
+        button {
+            background-color: #d4d0c8;
+            border: 2px outset #fff;
+            padding: 2px 10px;
+            cursor: pointer;
+        }
+        button:active {
+            border: 2px inset #fff;
+        }
+        marquee {
+            background-color: #000;
+            color: #00ff00;
+            font-family: monospace;
+            padding: 2px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <marquee>いらっしゃいませ！誕生日を計算する不思議な数式の実験室へようこそ！！キリ番踏んだら掲示板にカキコよろしく！</marquee>
+
+    <div class="window">
+        <div class="title-bar">数式のタネあかし</div>
+        <div class="content">
+            <p>誕生日の日に5倍して1引く。<br>
+            それを5倍して1ひく。<br>
+            その数を4倍して、生まれた月を足す。<br>
+            それに24を足す。</p>
+            <p><strong>結果：必ず「日」と「月」が並んだ数字になります。（例：15日8月生まれ → 1508）</strong></p>
+        </div>
+    </div>
+
+    <div class="window">
+        <div class="title-bar">366日自動計算テーブル</div>
+        <div class="content">
+            <div class="scroll-box">
+                <table id="auto-calc-table">
+                    <thead>
+                        <tr>
+                            <th>月 (M)</th>
+                            <th>日 (D)</th>
+                            <th>D×5-1</th>
+                            <th>×5-1</th>
+                            <th>×4+M</th>
+                            <th>+24 (最終結果)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- JSで自動生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="window">
+        <div class="title-bar">手動計算ツール（ありえない日付もOK）</div>
+        <div class="content">
+            <p>人間が入れたありえない日付（例：99月99日など）も計算できます。</p>
+            月(M): <input type="number" id="manual-m" value="99" style="width: 50px;"> 
+            日(D): <input type="number" id="manual-d" value="99" style="width: 50px;">
+            <button onclick="calcManual()">計算する</button>
+            <p id="manual-result" style="font-weight: bold; color: blue;"></p>
+        </div>
+    </div>
+
+    <div class="window">
+        <div class="title-bar">オリジナル数式・実験スペース</div>
+        <div class="content">
+            <p>自分で似たような数式を作って試せるスペースです。<br>
+            <strong>D</strong> を「日」、<strong>M</strong> を「月」として計算式を書いてください。</p>
+            <p>例: <code>(((D * 5) - 1) * 5 - 1) * 4 + M + 24</code></p>
+            月(M): <input type="number" id="custom-m" value="8" style="width: 50px;"> 
+            日(D): <input type="number" id="custom-d" value="15" style="width: 50px;"><br><br>
+            数式: <input type="text" id="custom-formula" value="(((D * 5) - 1) * 5 - 1) * 4 + M + 24" style="width: 300px;">
+            <button onclick="calcCustom()">実験する</button>
+            <p id="custom-result" style="font-weight: bold; color: red;"></p>
+        </div>
+    </div>
+
+    <script>
+        // 指定された計算を行う関数
+        function runMagic(d, m) {
+            let step1 = d * 5 - 1;
+            let step2 = step1 * 5 - 1;
+            let step3 = step2 * 4 + m;
+            let step4 = step3 + 24;
+            return { step1, step2, step3, step4 };
+        }
+
+        // 366日自動生成 (うるう年含む)
+        window.onload = function() {
+            const tbody = document.querySelector("#auto-calc-table tbody");
+            const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            
+            for (let m = 1; m <= 12; m++) {
+                for (let d = 1; d <= daysInMonth[m-1]; d++) {
+                    const res = runMagic(d, m);
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `
+                        <td>${m}</td>
+                        <td>${d}</td>
+                        <td>${res.step1}</td>
+                        <td>${res.step2}</td>
+                        <td>${res.step3}</td>
+                        <td style="font-weight:bold;">${res.step4}</td>
+                    `;
+                    tbody.appendChild(tr);
+                }
+            }
+        };
+
+        // 手動計算
+        function calcManual() {
+            const m = parseInt(document.getElementById("manual-m").value) || 0;
+            const d = parseInt(document.getElementById("manual-d").value) || 0;
+            const res = runMagic(d, m);
+            document.getElementById("manual-result").innerText = 
+                `結果: ${res.step4} (内訳: ①${res.step1} → ②${res.step2} → ③${res.step3} → ④${res.step4})`;
+        }
+
+        // オリジナル数式計算
+        function calcCustom() {
+            const m = parseFloat(document.getElementById("custom-m").value) || 0;
+            const d = parseFloat(document.getElementById("custom-d").value) || 0;
+            let formula = document.getElementById("custom-formula").value;
+            
+            try {
+                // セキュリティ保護のため、D, M, 数字, 演算子以外の入力を弾く簡易フィルター
+                if (!/^[D M \d\+\-\*\/\(\)\.\s]+$/i.test(formula)) {
+                    throw new Error("使用できない文字が含まれています。");
+                }
+                // DとMを変数の値に置換して計算
+                let evalStr = formula.replace(/D/ig, d).replace(/M/ig, m);
+                let result = new Function('return ' + evalStr)();
+                
+                document.getElementById("custom-result").innerText = `計算結果: ${result}`;
+            } catch (e) {
+                document.getElementById("custom-result").innerText = `エラー: 数式が正しくありません。`;
+            }
+        }
+    </script>
+</body>
+</html>
